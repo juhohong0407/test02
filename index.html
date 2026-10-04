@@ -55,7 +55,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 #nearList .s{width:42px;height:42px;display:grid;place-items:center}
 #nearList img{width:38px;height:38px}
 #nearList img.unk{filter:brightness(0);opacity:.55}
-#joy{position:absolute;left:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);width:124px;height:124px;border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.55);touch-action:none}
+#joy{position:absolute;left:40px;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.55);touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;background:var(--panel);border:3px solid;border-color:var(--panel-hi) var(--panel-lo) var(--panel-lo) var(--panel-hi);box-shadow:0 0 0 2px var(--edge)}
 #menuBtn{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);transform:translateX(-50%);width:78px;height:78px;padding:0;display:grid;place-items:center;background:var(--panel);border:3px solid;border-color:var(--panel-hi) var(--panel-lo) var(--panel-lo) var(--panel-hi);box-shadow:0 0 0 3px var(--edge)}
 #hintMap{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 84px);transform:translateX(-50%);font-size:14px;color:#fff;text-shadow:0 2px 0 #000,0 0 6px #000;white-space:nowrap;pointer-events:none}
@@ -592,11 +592,11 @@ const wilds=[];let wildSeq=1;
 function pickWeighted(tbl){let tot=0;for(const k in tbl)tot+=tbl[k];let r=Math.random()*tot;for(const k in tbl){r-=tbl[k];if(r<=0)return +k;}return +Object.keys(tbl)[0];}
 function newIV(){return{a:randi(0,15),d:randi(0,15),s:randi(0,15)};}
 function spawnWild(){
-  const a=rand(0,Math.PI*2),r=rand(13,32),x=player.position.x+Math.cos(a)*r,z=player.position.z+Math.sin(a)*r;
+  const a=rand(0,Math.PI*2),r=rand(7,28),x=player.position.x+Math.cos(a)*r,z=player.position.z+Math.sin(a)*r;
   const T=tileAt(Math.floor(x),Math.floor(z));const biome=T.road?tileBiomeNear(x,z):T.b;
   const sp=pickWeighted(SPAWN[biome]||SPAWN.grass);
   const lvl=randi(1,Math.min(30,save.level));
-  const w={id:wildSeq++,sp,lvl,iv:newIV(),shiny:Math.random()<1/100,x,z,biome,born:T0,life:rand(150,300)};
+  const w={id:wildSeq++,sp,lvl,iv:newIV(),shiny:Math.random()<1/100,x,z,biome,born:T0,life:rand(240,420)};
   const g=new THREE.Group();g.position.set(x,Math.max(groundY(x,z),-.15),z);
   const m=buildMon(sp,w.shiny);m.scale.setScalar(.62);g.add(m);
   const sh=new THREE.Mesh(shadowGeo,shadowMat);sh.scale.setScalar(Math.max(.8,m.userData.r*1.7));sh.position.y=.03;g.add(sh);
@@ -840,7 +840,7 @@ function updateMap(dt){
   for(let r=0;r<=RAD&&built<1;r++)for(let dx=-r;dx<=r&&built<1;dx++)for(let dz=-r;dz<=r&&built<1;dz++){const k=(pcx+dx)+','+(pcz+dz);if(!chunks.has(k)){buildChunk(pcx+dx,pcz+dz);built++;}}
   for(const k of chunks.keys()){const[a,b]=k.split(',').map(Number);if(Math.abs(a-pcx)>RAD+1||Math.abs(b-pcz)>RAD+1)dropChunk(k);}
   // spawns
-  spawnT-=dt;if(spawnT<=0){spawnT=rand(2,4);if(wilds.length<10)spawnWild();}
+  spawnT-=dt;if(spawnT<=0){spawnT=rand(.7,1.5);if(wilds.length<18)spawnWild();}
   for(let i=wilds.length-1;i>=0;i--){const w=wilds[i],d=Math.hypot(w.g.position.x-P.x,w.g.position.z-P.z);
     if(d>58||T0-w.born>w.life){removeWild(w);continue;}
     if(w.grow<1){w.grow=Math.min(1,w.grow+dt*2.5);w.g.scale.setScalar(easeOut(w.grow));}
@@ -1034,7 +1034,7 @@ function boot(data){
   // prebuild center chunk so the first frame isn't empty
   const pcx=Math.floor(p[0]/CH),pcz=Math.floor(p[1]/CH);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)buildChunk(pcx+dx,pcz+dz);
-  for(let i=0;i<6;i++)spawnWild();
+  for(let i=0;i<12;i++)spawnWild();
   wilds.forEach(w=>{w.grow=1;w.g.scale.setScalar(1);});
   updHud();$('#loading').hidden=true;$('#mapHud').hidden=false;
   requestAnimationFrame(frame);
